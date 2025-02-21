@@ -2,7 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:ui' show hashList, hashValues;
 import 'package:collection/collection.dart';
 
 /// Scope of a style attribute, defines context in which an attribute can be
@@ -182,7 +181,7 @@ class NotusAttribute<T> implements NotusAttributeBuilder<T> {
   }
 
   @override
-  int get hashCode => hashValues(key, scope, value);
+  int get hashCode => Object.hash(key, scope, value);
 
   @override
   String toString() => '$key: $value';
@@ -309,8 +308,8 @@ class NotusStyle {
 
   @override
   int get hashCode {
-    final hashes = _data.entries.map((entry) => hashValues(entry.key, entry.value));
-    return hashList(hashes);
+    final hashes = _data.entries.map((entry) => Object.hash(entry.key, entry.value));
+    return Object.hashAll(hashes);
   }
 
   @override
@@ -435,11 +434,11 @@ class EmbedAttribute extends NotusAttribute<Map<String, dynamic>?> {
   int get hashCode {
     final objects = [key, scope];
     if (value != null) {
-      final valueHashes = value!.entries.map((entry) => hashValues(entry.key, entry.value));
+      final valueHashes = value!.entries.map((entry) => Object.hash(entry.key, entry.value));
       objects.addAll(valueHashes);
     } else {
       objects.add(value!);
     }
-    return hashList(objects);
+    return Object.hashAll(objects);
   }
 }
