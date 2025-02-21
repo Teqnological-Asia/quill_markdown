@@ -232,7 +232,6 @@ class NotusStyle {
   /// Returns `true` if this set contains attribute with the same value as
   /// [attribute].
   bool containsSame(NotusAttribute attribute) {
-    assert(attribute != null);
     return get<dynamic>(attribute) == attribute;
   }
 

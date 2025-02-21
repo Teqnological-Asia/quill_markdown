@@ -5,7 +5,6 @@
 library quill_delta;
 
 import 'dart:math' as math;
-import 'dart:ui' show hashList, hashValues;
 
 import 'package:collection/collection.dart';
 
@@ -45,7 +44,7 @@ class Operation {
   final Map<String, dynamic>? _attributes;
 
   Operation._(this.key, this.length, this.data, Map? attributes)
-      : assert(key != null && length != null && data != null),
+      : assert(length != null),
         assert(_validKeys.contains(key), 'Invalid operation key "$key".'),
         assert(() {
           if (key != Operation.insertKey) return true;
@@ -138,10 +137,10 @@ class Operation {
   @override
   int get hashCode {
     if (_attributes != null && _attributes!.isNotEmpty) {
-      int attrsHash = hashList(_attributes!.entries.map((e) => hashValues(e.key, e.value)));
-      return hashValues(key, value, attrsHash);
+      int attrsHash = Object.hashAll(_attributes!.entries.map((e) => Object.hash(e.key, e.value)));
+      return Object.hash(key, value, attrsHash);
     }
-    return hashValues(key, value);
+    return Object.hash(key, value);
   }
 
   @override
@@ -219,9 +218,7 @@ class Delta {
 
   int _modificationCount = 0;
 
-  Delta._(List<Operation> operations)
-      : assert(operations != null),
-        _operations = operations;
+  Delta._(List<Operation> operations) : _operations = operations;
 
   /// Creates new empty [Delta].
   factory Delta() => new Delta._([]);
@@ -262,7 +259,7 @@ class Delta {
   Operation get last => _operations.last;
 
   @override
-  operator ==(dynamic other) {
+  operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! Delta) return false;
     Delta typedOther = other;
@@ -271,7 +268,7 @@ class Delta {
   }
 
   @override
-  int get hashCode => hashList(_operations);
+  int get hashCode => Object.hashAll(_operations);
 
   /// Retain [count] of characters from current position.
   void retain(int count, [Map<String, dynamic>? attributes]) {
@@ -282,7 +279,6 @@ class Delta {
 
   /// Insert [text] at current position.
   void insert(String text, [Map<String, dynamic>? attributes]) {
-    assert(text != null);
     if (text.isEmpty) return; // no-op
     push(Operation.insert(text, attributes));
   }
@@ -296,7 +292,7 @@ class Delta {
 
   void _mergeWithTail(Operation operation) {
     assert(isNotEmpty);
-    assert(operation != null && last.key == operation.key);
+    assert(last.key == operation.key);
 
     final int length = operation.length! + last.length!;
     final String data = last.data + operation.data;
@@ -602,8 +598,6 @@ class DeltaIterator {
   /// Optional [length] specifies maximum length of operation to return. Note
   /// that actual length of returned operation may be less than specified value.
   Operation? next([num length = double.infinity]) {
-    assert(length != null);
-
     if (_modificationCount != delta._modificationCount) {
       throw new ConcurrentModificationError(delta);
     }
